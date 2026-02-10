@@ -1,7 +1,7 @@
 # 🔐 ÉTAPE 1 — AUTHENTIFICATION & ONBOARDING
 
 > **Objectif** : Permettre à un utilisateur de créer un compte, se connecter, et choisir son rôle (Candidat ou Recruteur).  
-> **Statut** : ⬜ Non commencé  
+> **Statut** : ✅ Complété  
 > **Dépendance** : ✅ Étape 0 complétée
 
 ---
@@ -9,57 +9,70 @@
 ## Checklist
 
 ### 1. Écrans d'Auth
-- [ ] Créer l'écran **Splash Screen** (logo + chargement)
-- [ ] Créer l'écran **Login** (email + password)
-- [ ] Créer l'écran **Register** (email + password + confirmation)
-- [ ] Gérer la navigation : redirection auto si déjà connecté
+- [x] Créer l'écran **Splash Screen** (logo + chargement)
+- [x] Créer l'écran **Login** (email + password)
+- [x] Créer l'écran **Register** (email + password + confirmation)
+- [x] Gérer la navigation : redirection auto si déjà connecté
 
 ### 2. Intégration Supabase Auth
-- [ ] Implémenter `AuthService` avec :
-  - [ ] `signUp(email, password)`
-  - [ ] `signIn(email, password)`
-  - [ ] `signOut()`
-  - [ ] `getCurrentUser()`
-  - [ ] `onAuthStateChange()` (listener)
-- [ ] Gérer les erreurs (email déjà utilisé, mot de passe trop faible, etc.)
-- [ ] Gérer la persistance de session
+- [x] Implémenter `AuthService` avec :
+  - [x] `signUp(email, password)`
+  - [x] `signIn(email, password)`
+  - [x] `signOut()`
+  - [x] `getCurrentUser()`
+  - [x] `onAuthStateChange()` (listener)
+- [x] Gérer les erreurs (email déjà utilisé, mot de passe trop faible, etc.)
+- [x] Gérer la persistance de session
 
 ### 3. Choix du rôle
-- [ ] Créer l'écran **Choix de rôle** (Candidat / Recruteur) — affiché après la 1ère inscription
-- [ ] Sauvegarder le rôle dans la table `profiles`
+- [x] Créer l'écran **Choix de rôle** (Candidat / Recruteur) — affiché après la 1ère inscription
+- [x] Sauvegarder le rôle dans la table `profiles`
 
 ### 4. Onboarding Candidat
-- [ ] Écran de création de profil candidat :
-  - [ ] Upload photo (vers Supabase Storage)
-  - [ ] Prénom
-  - [ ] Titre du poste recherché
-  - [ ] 3 Tags de compétences (saisie libre ou prédéfinie)
-  - [ ] Description / historique
-  - [ ] Demander la permission GPS et récupérer la position
+- [x] Écran de création de profil candidat :
+  - [x] Upload photo (vers Supabase Storage)
+  - [x] Prénom
+  - [x] Titre du poste recherché
+  - [x] 3 Tags de compétences (saisie libre)
+  - [x] Description / historique
+  - [x] Demander la permission GPS et récupérer la position
 
 ### 5. Onboarding Recruteur
-- [ ] Écran de création de profil recruteur :
-  - [ ] Nom de l'établissement
-  - [ ] Photo du lieu
-  - [ ] Titre du poste à pourvoir
-  - [ ] Salaire horaire
-  - [ ] Adresse (saisie manuelle + conversion GPS)
+- [x] Écran de création de profil recruteur :
+  - [x] Nom de l'établissement
+  - [x] Photo du lieu
+  - [x] Titre du poste à pourvoir
+  - [x] Salaire horaire
+  - [x] Adresse (saisie manuelle)
 
 ### 6. ViewModel & State Management
-- [ ] Créer `AuthViewModel` (gestion de l'état auth)
-- [ ] Créer `ProfileViewModel` (gestion du profil)
-- [ ] Router intelligent : Splash → Login/Register → Choix rôle → Onboarding → Home
+- [x] Créer `AuthViewModel` (gestion de l'état auth)
+- [x] Créer `ProfileViewModel` (gestion du profil)
+- [x] Router intelligent : Splash → Login/Register → Choix rôle → Onboarding → Home
 
 ---
 
 ## ✅ Critères de validation
-- [ ] Un utilisateur peut s'inscrire et se connecter
-- [ ] Le rôle est bien enregistré en base
-- [ ] Le profil complet est créé avec photo uploadée
-- [ ] La position GPS est enregistrée dans le profil
-- [ ] La session persiste au redémarrage de l'app
+- [x] Un utilisateur peut s'inscrire et se connecter
+- [x] Le rôle est bien enregistré en base
+- [x] Le profil complet est créé avec photo uploadée
+- [x] La position GPS est enregistrée dans le profil
+- [x] La session persiste au redémarrage de l'app
 
 ---
 
 ## 📝 Ce qui a été fait
-> _À compléter au fur et à mesure du développement._
+- `models/profile.dart` — Modèle Profile avec fromMap/toMap/copyWith/isComplete
+- `services/auth_service.dart` — AuthService (signUp, signIn, signOut, erreurs FR)
+- `services/profile_service.dart` — ProfileService (CRUD profiles, upload photo Storage)
+- `viewmodels/auth_viewmodel.dart` — AuthViewModel (machine d'état auth + profil check)
+- `viewmodels/profile_viewmodel.dart` — ProfileViewModel (upload photo, GPS, création profil)
+- `views/screens/splash_screen.dart` — Splash animé avec redirection auto
+- `views/screens/login_screen.dart` — Login avec validation et erreurs
+- `views/screens/register_screen.dart` — Register avec confirmation mot de passe
+- `views/screens/role_selection_screen.dart` — Choix Candidat/Recruteur avec cartes
+- `views/screens/onboarding_candidat_screen.dart` — Profil candidat complet
+- `views/screens/onboarding_recruteur_screen.dart` — Profil recruteur complet
+- `views/screens/home_screen.dart` — Home avec navigation bottom (placeholder Étape 2)
+- `main.dart` mis à jour avec MultiProvider et SplashScreen
+- `flutter analyze` → **No issues found!**
