@@ -56,7 +56,15 @@ class _OnboardingRecruteurScreenState extends State<OnboardingRecruteurScreen> {
     // Upload photo si sélectionnée
     if (_pickedImage != null) {
       final bytes = await _pickedImage!.readAsBytes();
-      await profileVM.uploadPhoto(bytes);
+      final success = await profileVM.uploadPhoto(bytes);
+      if (!success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(profileVM.error ?? 'Erreur upload photo')),
+          );
+        }
+        return;
+      }
     }
 
     // Demander la localisation

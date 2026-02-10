@@ -38,8 +38,7 @@ class ProfileViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = 'Erreur upload photo: $e';
-      debugPrint('Upload photo error: $e');
+      _error = 'Erreur lors de l\'upload de la photo';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -129,7 +128,6 @@ class ProfileViewModel extends ChangeNotifier {
       return profile;
     } catch (e) {
       _error = 'Erreur création profil: $e';
-      debugPrint('Create candidat profile error: $e');
       _isLoading = false;
       notifyListeners();
       return null;
@@ -166,7 +164,6 @@ class ProfileViewModel extends ChangeNotifier {
       return profile;
     } catch (e) {
       _error = 'Erreur création profil: $e';
-      debugPrint('Create recruteur profile error: $e');
       _isLoading = false;
       notifyListeners();
       return null;

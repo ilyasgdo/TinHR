@@ -64,8 +64,11 @@ class ProfileService {
       'longitude': longitude,
     };
 
-    final response =
-        await _client.from('profiles').insert(data).select().single();
+    final response = await _client
+        .from('profiles')
+        .upsert(data, onConflict: 'user_id')
+        .select()
+        .single();
 
     return Profile.fromMap(response);
   }

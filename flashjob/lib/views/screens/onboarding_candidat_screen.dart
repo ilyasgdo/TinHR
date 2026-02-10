@@ -72,17 +72,22 @@ class _OnboardingCandidatScreenState extends State<OnboardingCandidatScreen> {
     final profileVM = context.read<ProfileViewModel>();
     final authVM = context.read<AuthViewModel>();
 
-    // Upload photo si sélectionnée (non bloquant)
+    // Upload photo si sélectionnée
     if (_pickedImage != null) {
       final bytes = await _pickedImage!.readAsBytes();
-      await profileVM.uploadPhoto(bytes);
+      final success = await profileVM.uploadPhoto(bytes);
+      if (!success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(profileVM.error ?? 'Erreur upload photo')),
+          );
+        }
+        return;
+      }
     }
 
-    // Demander la localisation (non bloquant)
+    // Demander la localisation
     await profileVM.requestLocation();
-
-    // Effacer les erreurs éventuelles de photo/location avant la création
-    profileVM.clearError();
 
     // Créer le profil
     final profile = await profileVM.createCandidatProfile(
