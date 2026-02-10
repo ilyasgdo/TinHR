@@ -22,7 +22,7 @@ class _OnboardingRecruteurScreenState extends State<OnboardingRecruteurScreen> {
   final _posteController = TextEditingController();
   final _salaireController = TextEditingController();
   final _adresseController = TextEditingController();
-  String? _pickedImagePath;
+  XFile? _pickedImage;
 
   @override
   void dispose() {
@@ -43,7 +43,7 @@ class _OnboardingRecruteurScreenState extends State<OnboardingRecruteurScreen> {
       imageQuality: 80,
     );
     if (image != null) {
-      setState(() => _pickedImagePath = image.path);
+      setState(() => _pickedImage = image);
     }
   }
 
@@ -54,8 +54,9 @@ class _OnboardingRecruteurScreenState extends State<OnboardingRecruteurScreen> {
     final authVM = context.read<AuthViewModel>();
 
     // Upload photo si sélectionnée
-    if (_pickedImagePath != null) {
-      await profileVM.uploadPhoto(_pickedImagePath!);
+    if (_pickedImage != null) {
+      final bytes = await _pickedImage!.readAsBytes();
+      await profileVM.uploadPhoto(bytes);
     }
 
     // Demander la localisation
@@ -148,7 +149,7 @@ class _OnboardingRecruteurScreenState extends State<OnboardingRecruteurScreen> {
                             width: 3,
                           ),
                         ),
-                        child: _pickedImagePath == null
+                        child: _pickedImage == null
                             ? const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -161,7 +162,8 @@ class _OnboardingRecruteurScreenState extends State<OnboardingRecruteurScreen> {
                                           fontSize: 11)),
                                 ],
                               )
-                            : null,
+                            : const Icon(Icons.check_circle,
+                                color: AppTheme.success, size: 40),
                       ),
                     ),
                   ),

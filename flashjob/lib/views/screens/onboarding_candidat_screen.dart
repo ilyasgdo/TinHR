@@ -22,7 +22,7 @@ class _OnboardingCandidatScreenState extends State<OnboardingCandidatScreen> {
   final _descriptionController = TextEditingController();
   final _tagController = TextEditingController();
   final List<String> _tags = [];
-  String? _pickedImagePath;
+  XFile? _pickedImage;
 
   @override
   void dispose() {
@@ -42,7 +42,7 @@ class _OnboardingCandidatScreenState extends State<OnboardingCandidatScreen> {
       imageQuality: 80,
     );
     if (image != null) {
-      setState(() => _pickedImagePath = image.path);
+      setState(() => _pickedImage = image);
     }
   }
 
@@ -73,8 +73,9 @@ class _OnboardingCandidatScreenState extends State<OnboardingCandidatScreen> {
     final authVM = context.read<AuthViewModel>();
 
     // Upload photo si sélectionnée
-    if (_pickedImagePath != null) {
-      await profileVM.uploadPhoto(_pickedImagePath!);
+    if (_pickedImage != null) {
+      final bytes = await _pickedImage!.readAsBytes();
+      await profileVM.uploadPhoto(bytes);
     }
 
     // Demander la localisation
@@ -163,14 +164,8 @@ class _OnboardingCandidatScreenState extends State<OnboardingCandidatScreen> {
                             color: AppTheme.primary.withValues(alpha: 0.5),
                             width: 3,
                           ),
-                          image: _pickedImagePath != null
-                              ? DecorationImage(
-                                  image: AssetImage(_pickedImagePath!),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
                         ),
-                        child: _pickedImagePath == null
+                        child: _pickedImage == null
                             ? const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -183,7 +178,8 @@ class _OnboardingCandidatScreenState extends State<OnboardingCandidatScreen> {
                                           fontSize: 12)),
                                 ],
                               )
-                            : null,
+                            : const Icon(Icons.check_circle,
+                                color: AppTheme.success, size: 40),
                       ),
                     ),
                   ),

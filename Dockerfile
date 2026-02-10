@@ -10,6 +10,12 @@ WORKDIR /app
 # Copier le projet Flutter
 COPY flashjob/ .
 
+# Copier le .env à la racine du projet Flutter (nécessaire pour flutter_dotenv)
+COPY .env .env
+
+# Installer les dépendances
+RUN flutter pub get
+
 # Build web en release
 RUN flutter build web --release
 

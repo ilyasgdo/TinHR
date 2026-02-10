@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/profile.dart';
 
 /// Service de gestion des profils via Supabase.
