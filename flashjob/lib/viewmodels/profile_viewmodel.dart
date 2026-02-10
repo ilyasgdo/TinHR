@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/profile.dart';
@@ -20,8 +21,8 @@ class ProfileViewModel extends ChangeNotifier {
   double? get longitude => _longitude;
   bool get hasLocation => _latitude != null && _longitude != null;
 
-  /// Upload une photo de profil.
-  Future<bool> uploadPhoto(String filePath) async {
+  /// Upload une photo de profil (accepte les bytes directement).
+  Future<bool> uploadPhoto(Uint8List bytes) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -29,8 +30,8 @@ class ProfileViewModel extends ChangeNotifier {
     try {
       final fileName =
           'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      _uploadedPhotoUrl = await _profileService.uploadPhoto(
-        filePath: filePath,
+      _uploadedPhotoUrl = await _profileService.uploadPhotoBytes(
+        bytes: bytes,
         fileName: fileName,
       );
       _isLoading = false;

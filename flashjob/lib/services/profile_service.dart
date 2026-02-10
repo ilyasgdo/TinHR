@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -85,38 +84,23 @@ class ProfileService {
   }
 
   /// Upload une photo vers Supabase Storage et retourne l'URL publique.
-  Future<String> uploadPhoto({
-    required String filePath,
+  /// Accepte les bytes directement pour la compatibilité web.
+  Future<String> uploadPhotoBytes({
+    required Uint8List bytes,
     required String fileName,
   }) async {
     final userId = _client.auth.currentUser!.id;
     final storagePath = '$userId/$fileName';
 
-    if (kIsWeb) {
-      // Sur le web, on utilise uploadBinary
-      final file = await _readFileAsBytes(filePath);
-      await _client.storage.from('avatars').uploadBinary(
-            storagePath,
-            file,
-            fileOptions: const FileOptions(upsert: true),
-          );
-    } else {
-      await _client.storage.from('avatars').upload(
-            storagePath,
-            File(filePath),
-            fileOptions: const FileOptions(upsert: true),
-          );
-    }
+    await _client.storage.from('avatars').uploadBinary(
+          storagePath,
+          bytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
 
     final publicUrl =
         _client.storage.from('avatars').getPublicUrl(storagePath);
 
     return publicUrl;
-  }
-
-  /// Lecture de fichier en bytes (pour le web).
-  Future<Uint8List> _readFileAsBytes(String filePath) async {
-    final file = File(filePath);
-    return await file.readAsBytes();
   }
 }
