@@ -72,14 +72,17 @@ class _OnboardingCandidatScreenState extends State<OnboardingCandidatScreen> {
     final profileVM = context.read<ProfileViewModel>();
     final authVM = context.read<AuthViewModel>();
 
-    // Upload photo si sélectionnée
+    // Upload photo si sélectionnée (non bloquant)
     if (_pickedImage != null) {
       final bytes = await _pickedImage!.readAsBytes();
       await profileVM.uploadPhoto(bytes);
     }
 
-    // Demander la localisation
+    // Demander la localisation (non bloquant)
     await profileVM.requestLocation();
+
+    // Effacer les erreurs éventuelles de photo/location avant la création
+    profileVM.clearError();
 
     // Créer le profil
     final profile = await profileVM.createCandidatProfile(
