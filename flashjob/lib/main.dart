@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'core/theme.dart';
 import 'viewmodels/auth_viewmodel.dart';
 import 'viewmodels/profile_viewmodel.dart';
+import 'viewmodels/feed_viewmodel.dart';
 import 'views/screens/splash_screen.dart';
 
 void main() async {
@@ -34,6 +35,7 @@ class FlashJobApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+        ChangeNotifierProvider(create: (_) => FeedViewModel()),
       ],
       child: MaterialApp(
         title: 'FlashJob',

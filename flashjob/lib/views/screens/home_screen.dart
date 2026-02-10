@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme.dart';
 import '../../viewmodels/auth_viewmodel.dart';
-import 'login_screen.dart';
+import '../../viewmodels/feed_viewmodel.dart';
+import '../widgets/card_stack.dart';
 
-/// Écran d'accueil principal (placeholder pour l'Étape 2).
+/// Écran principal — Feed, Matches, Profil.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -14,12 +15,38 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  bool _feedLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Charger le feed au premier affichage
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadFeed();
+    });
+  }
+
+  void _loadFeed() {
+    if (_feedLoaded) return;
+    final authVM = context.read<AuthViewModel>();
+    final feedVM = context.read<FeedViewModel>();
+    final profile = authVM.currentProfile;
+
+    if (profile != null &&
+        profile.latitude != null &&
+        profile.longitude != null) {
+      feedVM.loadProfiles(
+        currentProfileId: profile.id,
+        latitude: profile.latitude!,
+        longitude: profile.longitude!,
+        radiusKm: profile.rayonRechercheKm,
+      );
+      _feedLoaded = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthViewModel>();
-    final profile = auth.currentProfile;
-
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -30,162 +57,21 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         child: SafeArea(
-          child: IndexedStack(
-            index: _currentIndex,
+          child: Column(
             children: [
-              // Tab 0 : Feed (placeholder)
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              // App bar
+              _buildAppBar(),
+              // Content
+              Expanded(
+                child: IndexedStack(
+                  index: _currentIndex,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        gradient: AppTheme.primaryGradient,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.primary.withValues(alpha: 0.4),
-                            blurRadius: 30,
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.swipe_rounded,
-                          size: 64, color: Colors.white),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Bienvenue ${profile?.prenom ?? ''} ! 👋',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      profile?.isCandidat == true
-                          ? 'Le feed de swipe arrive à l\'Étape 2'
-                          : 'Vos candidats arrivent à l\'Étape 2',
-                      style: const TextStyle(
-                          color: AppTheme.textMuted, fontSize: 14),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: profile?.isCandidat == true
-                            ? AppTheme.primary.withValues(alpha: 0.2)
-                            : AppTheme.secondary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        profile?.isCandidat == true
-                            ? '🔍 Candidat — ${profile?.titrePoste}'
-                            : '🏢 Recruteur — ${profile?.nomEtablissement}',
-                        style: TextStyle(
-                          color: profile?.isCandidat == true
-                              ? AppTheme.primaryLight
-                              : AppTheme.secondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Tab 1 : Matches (placeholder)
-              const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.favorite_rounded,
-                        size: 64, color: AppTheme.accent),
-                    SizedBox(height: 16),
-                    Text(
-                      'Vos Matches',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text('Disponible à l\'Étape 3',
-                        style: TextStyle(color: AppTheme.textMuted)),
-                  ],
-                ),
-              ),
-
-              // Tab 2 : Profil
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 48,
-                      backgroundColor: AppTheme.surfaceLight,
-                      backgroundImage: profile?.photoUrl != null
-                          ? NetworkImage(profile!.photoUrl!)
-                          : null,
-                      child: profile?.photoUrl == null
-                          ? const Icon(Icons.person,
-                              size: 48, color: AppTheme.textMuted)
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      profile?.prenom ?? '',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      profile?.titrePoste ?? '',
-                      style: const TextStyle(
-                          color: AppTheme.textSecondary, fontSize: 16),
-                    ),
-                    if (profile?.tags.isNotEmpty == true) ...[
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        children: profile!.tags.map((tag) {
-                          return Chip(
-                            label: Text(tag,
-                                style:
-                                    const TextStyle(color: Colors.white, fontSize: 12)),
-                            backgroundColor:
-                                AppTheme.primary.withValues(alpha: 0.3),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                    const SizedBox(height: 32),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        await auth.signOut();
-                        if (context.mounted) {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                                builder: (_) => const LoginScreen()),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.logout_rounded),
-                      label: const Text('Se déconnecter'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.error.withValues(alpha: 0.2),
-                        foregroundColor: AppTheme.error,
-                      ),
-                    ),
+                    // Tab 0 — Feed / Swipe
+                    const CardStack(),
+                    // Tab 1 — Matches (placeholder)
+                    _buildMatchesTab(),
+                    // Tab 2 — Profil
+                    _buildProfileTab(),
                   ],
                 ),
               ),
@@ -193,35 +79,259 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildAppBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Row(
+        children: [
+          // Logo
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: AppTheme.primaryGradient,
+              borderRadius: BorderRadius.circular(12),
             ),
-          ],
+            child: const Icon(Icons.bolt_rounded, color: Colors.white, size: 22),
+          ),
+          const SizedBox(width: 12),
+          const Text(
+            'FlashJob',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: AppTheme.textPrimary,
+              letterSpacing: 1,
+            ),
+          ),
+          const Spacer(),
+          // Notifications (futur)
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceLight,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.notifications_outlined,
+                color: AppTheme.textMuted, size: 20),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMatchesTab() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.people_outline, color: AppTheme.textMuted, size: 56),
+          SizedBox(height: 16),
+          Text(
+            'Vos Matches',
+            style: TextStyle(
+              color: AppTheme.textPrimary,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Bientôt disponible...',
+            style: TextStyle(color: AppTheme.textMuted, fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileTab() {
+    return Consumer<AuthViewModel>(
+      builder: (context, authVM, child) {
+        final profile = authVM.currentProfile;
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              // Avatar
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: AppTheme.primaryGradient,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primary.withValues(alpha: 0.4),
+                      blurRadius: 20,
+                      spreadRadius: 4,
+                    ),
+                  ],
+                ),
+                child: profile?.photoUrl != null
+                    ? ClipOval(
+                        child: Image.network(profile!.photoUrl!,
+                            fit: BoxFit.cover,
+                            width: 100,
+                            height: 100),
+                      )
+                    : const Icon(Icons.person_rounded,
+                        color: Colors.white, size: 48),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                profile?.prenom ?? 'Utilisateur',
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceLight,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  profile?.isCandidat == true ? '🎯 Candidat' : '🏢 Recruteur',
+                  style: const TextStyle(
+                      color: AppTheme.textMuted, fontSize: 13),
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (profile?.titrePoste != null)
+                Text(
+                  profile!.titrePoste!,
+                  style: const TextStyle(
+                      color: AppTheme.textSecondary, fontSize: 15),
+                ),
+              const SizedBox(height: 32),
+
+              // Info cards
+              _buildInfoCard(
+                icon: Icons.location_on_outlined,
+                label: 'Rayon de recherche',
+                value: '${profile?.rayonRechercheKm ?? 20} km',
+              ),
+              if (profile?.isRecruteur == true &&
+                  profile?.salaireHoraire != null)
+                _buildInfoCard(
+                  icon: Icons.euro_rounded,
+                  label: 'Salaire proposé',
+                  value: '${profile!.salaireHoraire!.toStringAsFixed(0)}€/h',
+                ),
+              if (profile?.isCandidat == true && profile!.tags.isNotEmpty)
+                _buildInfoCard(
+                  icon: Icons.tag,
+                  label: 'Compétences',
+                  value: profile.tags.join(', '),
+                ),
+              const SizedBox(height: 24),
+
+              // Logout button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    authVM.signOut();
+                    Navigator.of(context)
+                        .pushReplacementNamed('/'); // Retour au splash
+                  },
+                  icon: const Icon(Icons.logout_rounded, color: AppTheme.error),
+                  label: const Text('Déconnexion',
+                      style: TextStyle(color: AppTheme.error)),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppTheme.error),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+            color: AppTheme.surfaceLight.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: AppTheme.primaryLight, size: 22),
+          const SizedBox(width: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label,
+                  style: const TextStyle(
+                      color: AppTheme.textMuted, fontSize: 12)),
+              const SizedBox(height: 2),
+              Text(value,
+                  style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        border: Border(
+          top: BorderSide(
+              color: AppTheme.surfaceLight.withValues(alpha: 0.3)),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.swipe_rounded),
-              label: 'Swipe',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_rounded),
-              label: 'Matches',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_rounded),
-              label: 'Profil',
-            ),
-          ],
-        ),
+      ),
+      child: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        selectedItemColor: AppTheme.primary,
+        unselectedItemColor: AppTheme.textMuted,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.style_rounded),
+            label: 'Swipe',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_rounded),
+            label: 'Matches',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_rounded),
+            label: 'Profil',
+          ),
+        ],
       ),
     );
   }
